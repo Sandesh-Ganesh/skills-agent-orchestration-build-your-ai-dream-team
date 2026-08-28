@@ -1,0 +1,32 @@
+{
+  "projects": [
+    {
+      "name": "Contributor Onboarding",
+      "owner": "Maya Chen",
+      "status": "In progress",
+      "recentActivity": "Published the refreshed setup guide and scheduled a contributor feedback session.",
+      "priority": "High"
+    },
+    {
+      "name": "API Reliability",
+      "owner": "Jordan Ellis",
+      "status": "At risk",
+      "recentActivity": "Investigating elevated timeout rates in the regional sync worker.",
+      "priority": "Critical"
+    },
+    {
+      "name": "Design System Refresh",
+      "owner": "Priya Nair",
+      "status": "In review",
+      "recentActivity": "Shared the accessible form controls proposal for engineering review.",
+      "priority": "Medium"
+    },
+    {
+      "name": "Usage Insights",
+      "owner": "Alex Romero",
+      "status": "Planned",
+      "recentActivity": "Defined the first dashboard metrics and confirmed the analytics event inventory.",
+      "priority": "Low"
+    }
+  ]
+}

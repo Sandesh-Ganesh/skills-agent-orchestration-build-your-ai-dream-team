@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Pulse</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="dashboard" aria-labelledby="page-title">
+    <header class="dashboard-header">
+      <p class="eyebrow">Team delivery overview</p>
+      <h1 id="page-title">Project Pulse</h1>
+      <p class="dashboard-intro">A current view of the work moving the team forward.</p>
+    </header>
+
+    <section class="project-section" aria-labelledby="projects-title">
+      <div class="section-heading">
+        <h2 id="projects-title">Projects</h2>
+        <p id="project-count" class="project-count" aria-live="polite"></p>
+      </div>
+
+      <div id="project-status" class="status-message" role="status" aria-live="polite">
+        Loading projects...
+      </div>
+      <div id="project-error" class="status-message status-message--error" role="alert" hidden>
+        We could not load project data. Please try again later.
+      </div>
+      <div id="project-empty" class="status-message" hidden>
+        No projects are available yet.
+      </div>
+      <div id="project-list" class="project-grid" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <template id="project-card-template">
+    <article class="project-card">
+      <div class="project-card-header">
+        <h3 class="project-name"></h3>
+        <span class="priority-badge"></span>
+      </div>
+      <dl class="project-details">
+        <div>
+          <dt>Owner</dt>
+          <dd class="project-owner"></dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd class="project-status"></dd>
+        </div>
+        <div>
+          <dt>Priority</dt>
+          <dd class="project-priority"></dd>
+        </div>
+      </dl>
+      <div class="project-activity">
+        <h4>Recent activity</h4>
+        <p class="project-recent-activity"></p>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    const projectList = document.querySelector('#project-list');
+    const projectStatus = document.querySelector('#project-status');
+    const projectError = document.querySelector('#project-error');
+    const projectEmpty = document.querySelector('#project-empty');
+    const projectCount = document.querySelector('#project-count');
+    const projectTemplate = document.querySelector('#project-card-template');
+    const requiredFields = ['name', 'owner', 'status', 'recentActivity', 'priority'];
+
+    function showState(state) {
+      projectStatus.hidden = state !== 'loading';
+      projectError.hidden = state !== 'error';
+      projectEmpty.hidden = state !== 'empty';
+    }
+
+    function renderProjects(projects) {
+      projectList.replaceChildren();
+      projectCount.textContent = `${projects.length} ${projects.length === 1 ? 'project' : 'projects'}`;
+
+      projects.forEach((project) => {
+        const card = projectTemplate.content.cloneNode(true);
+        card.querySelector('.project-name').textContent = project.name;
+        card.querySelector('.project-owner').textContent = project.owner;
+        card.querySelector('.project-status').textContent = project.status;
+        card.querySelector('.project-priority').textContent = project.priority;
+        card.querySelector('.priority-badge').textContent = project.priority;
+        card.querySelector('.project-recent-activity').textContent = project.recentActivity;
+        projectList.append(card);
+      });
+    }
+
+    async function loadProjects() {
+      showState('loading');
+      projectCount.textContent = '';
+
+      try {
+        const response = await fetch('project-data.json', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error(`Project data request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!data || !Array.isArray(data.projects)) {
+          throw new Error('Project data must contain a top-level projects array');
+        }
+
+        const projects = data.projects.filter((project) =>
+          project && requiredFields.every((field) => typeof project[field] === 'string' && project[field].trim())
+        );
+        renderProjects(projects);
+        showState(projects.length === 0 ? 'empty' : 'ready');
+      } catch (error) {
+        projectList.replaceChildren();
+        projectCount.textContent = '';
+        showState('error');
+        console.error('Unable to load Project Pulse data:', error);
+      }
+    }
+
+    loadProjects();
+  </script>
+</body>
+</html>
